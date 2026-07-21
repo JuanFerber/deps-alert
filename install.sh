@@ -63,7 +63,10 @@ if [ -f "$HOOK_FILE" ]; then
   # Pregunta interactiva segura. Prevenimos fallos en entornos CI/CD (GitHub Actions, Docker) donde /dev/tty no existe
   user_response="y" # Respuesta por defecto
   if [ -c /dev/tty ] && [ -t 1 ]; then
-    if read -r -p "¿Deseas que integremos deps-alert automaticamente? (y/n): " prompt_response </dev/tty 2>/dev/null; then
+    # Imprimimos la pregunta explícitamente para evitar que se pierda
+    echo -n "¿Deseas que integremos deps-alert automaticamente? (y/n): "
+    # Leemos la respuesta sin silenciar los errores críticos de la terminal
+    if read -r prompt_response </dev/tty; then
       user_response=${prompt_response:-y}
     fi
   else
