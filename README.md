@@ -1,5 +1,7 @@
 # 🚨 deps-alert
 
+[![ShellCheck](https://github.com/JuanFerber/deps-alert/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/JuanFerber/deps-alert/actions/workflows/shellcheck.yml)
+
 ¡Nunca más olvides instalar dependencias después de un `git pull`!
 
 **deps-alert** es una herramienta global, simple y ligera escrita en Bash que se instala como un Git Hook (`post-merge`). Su única función es avisarte si un compañero de equipo modificó algún archivo de dependencias (como `package.json`, `requirements.txt`, `go.mod`, etc.) durante el último merge o pull.
