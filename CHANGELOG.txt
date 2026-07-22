@@ -1,3 +1,7 @@
+v1.0.6
+- Se reemplazo la entrada tradicional por `read -n 1` permitiendo al usuario responder sin tener que presionar Enter.
+- Se rediseño el renderizado del historial oculto simulando un scroll continuo sin repetir lineas previas.
+- Se agrego un filtro silencioso a git diff-tree previniendo advertencias (ORIG_HEAD) en repositorios recien creados.
 v1.0.5
 - Se agrego soporte interactivo en la terminal (tecla 'f') para permitir ver el changelog completo sin limite de lineas.
 - Se implemento un bucle de validacion en el auto-actualizador para mejorar la Experiencia de Usuario (UX) ante respuestas incorrectas.

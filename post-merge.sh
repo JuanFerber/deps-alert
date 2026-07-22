@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
-CURRENT_VERSION="v1.0.5"
+CURRENT_VERSION="v1.0.6"
 
 # 1. Analisis de repositorio
-changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD)
+changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD 2>/dev/null || true)
 
 # 2. Chequeo de dependencias
 dependency_files=(
@@ -64,41 +64,58 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
     echo -e "\n${CYAN}💡 Hay una nueva versión de deps-alert disponible ($latest_version).${NC}"
     echo -e "${CYAN}Novedades:${NC}"
 
-    # Extraer novedades (maximo 15 lineas para no saturar la pantalla)
-    echo "$remote_changelog" | awk -v curr="$CURRENT_VERSION" '
-      BEGIN { count = 0 }
+    # Extraer todas las novedades en una variable
+    changelog_updates=$(echo "$remote_changelog" | awk -v curr="$CURRENT_VERSION" '
       NR>1 {
         if ($0 == curr) exit
-        if (count >= 15) {
-          print "  ... (hay mas cambios, presiona f luego para ver la lista completa)"
-          exit
-        }
         print "  " $0
-        count++
       }
-    '
+    ')
+
+    total_lines=$(echo "$changelog_updates" | wc -l)
+
+    # Mostrar novedades (limitado a 15)
+    if [ "$total_lines" -gt 15 ]; then
+      echo "$changelog_updates" | head -n 15
+      echo -e ""
+      echo -n "¿Actualizar? (y=si, n=no, f=expandir $((total_lines - 15)) lineas ocultas): "
+    else
+      echo "$changelog_updates"
+      echo -e ""
+      echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
+    fi
 
     # Iniciar flujo interactivo seguro para actualizar
     if [ -c /dev/tty ] && [ -t 1 ]; then
       while true; do
-        echo -e ""
-        echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n/f para ver todo): "
-        if read -r update_response </dev/tty; then
+        # read -n 1 lee exactamente 1 caracter sin esperar a que el usuario presione Enter
+        if read -n 1 -r update_response </dev/tty; then
+          # Si presiona Enter accidentalmente (cadena vacia), lo ignoramos
+          if [[ -z "$update_response" ]]; then
+            continue
+          fi
+          
+          echo "" # Salto de linea visual para que no se pegue el texto
+
           if [[ "$update_response" =~ ^[Yy] ]]; then
             echo "Descargando e instalando actualización..."
             curl -sL "$INSTALL_URL" | bash
             break
-          elif [[ "$update_response" =~ ^[Ff] ]]; then
-            echo -e "\n${CYAN}--- Historial Completo ---${NC}"
-            echo "$remote_changelog" | awk -v curr="$CURRENT_VERSION" '
-              NR>1 {
-                if ($0 == curr) exit
-                print "  " $0
-              }
-            '
-            echo -e "${CYAN}--------------------------${NC}"
-          else
+          elif [[ "$update_response" =~ ^[Nn] ]]; then
             break
+          elif [[ "$update_response" =~ ^[Ff] && "$total_lines" -gt 15 ]]; then
+            # Imprimir el resto del historial a partir de la linea 16
+            echo "$changelog_updates" | tail -n +16
+            echo -e ""
+            echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
+            total_lines=0 # Desactivamos la tecla 'f' para el resto del bucle
+          else
+            # Input invalido
+            if [ "$total_lines" -gt 15 ]; then
+              echo -n "(y/n/f): "
+            else
+              echo -n "(y/n): "
+            fi
           fi
         else
           break
