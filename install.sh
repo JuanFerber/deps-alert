@@ -60,20 +60,20 @@ if [ -f "$HOOK_FILE" ]; then
   echo -e "\n${YELLOW}⚠️  Detectamos que ya tienes un archivo 'post-merge' configurado en tu proyecto.${NC}"
   echo "Para no romper tu configuracion, podemos crear un 'dispatcher' que ejecute tu codigo actual y luego el nuestro."
 
-  # Pregunta interactiva segura. Prevenimos fallos en entornos CI/CD (GitHub Actions, Docker) donde /dev/tty no existe
-  user_response="y" # Respuesta por defecto
+    # Pregunta interactiva segura. Prevenimos fallos en entornos CI/CD
+  user_response="s" # Respuesta por defecto
   if [ -c /dev/tty ] && [ -t 1 ]; then
     # Imprimimos la pregunta explícitamente para evitar que se pierda
-    echo -n "¿Deseas que integremos deps-alert automaticamente? (y/n): "
+    echo -n "¿Deseas que integremos deps-alert automaticamente? (S/n): "
     # Leemos la respuesta sin silenciar los errores críticos de la terminal
     if read -r prompt_response </dev/tty; then
-      user_response=${prompt_response:-y}
+      user_response=${prompt_response:-s}
     fi
   else
-    echo -e "Entorno no interactivo detectado. Asumiendo integracion automatica (y)..."
+    echo -e "Entorno no interactivo detectado. Asumiendo integracion automatica (s)..."
   fi
 
-  if [[ "$user_response" =~ ^[Yy] ]]; then
+  if [[ "$user_response" =~ ^[Ss] ]]; then
     echo -e "\nIntegrando automaticamente..."
 
     # Movemos el hook del usuario a post-merge.local

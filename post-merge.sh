@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
-CURRENT_VERSION="v1.0.6"
+CURRENT_VERSION="v1.0.7"
 
 # 1. Analisis de repositorio
 changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD 2>/dev/null || true)
@@ -77,44 +77,42 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
     # Mostrar novedades (limitado a 15)
     if [ "$total_lines" -gt 15 ]; then
       echo "$changelog_updates" | head -n 15
-      echo -e ""
-      echo -n "¿Actualizar? (y=si, n=no, f=expandir $((total_lines - 15)) lineas ocultas): "
+      echo -e "  ...\n"
+      echo -ne "¿Actualizar? (s=sí, n=no, f=expandir $((total_lines - 15)) lineas): "
     else
       echo "$changelog_updates"
       echo -e ""
-      echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
+      echo -ne "¿Deseas actualizar deps-alert de forma automática? (S/n): "
     fi
 
     # Iniciar flujo interactivo seguro para actualizar
     if [ -c /dev/tty ] && [ -t 1 ]; then
       while true; do
-        # read -n 1 lee exactamente 1 caracter sin esperar a que el usuario presione Enter
         if read -n 1 -r update_response </dev/tty; then
-          # Si presiona Enter accidentalmente (cadena vacia), lo ignoramos
           if [[ -z "$update_response" ]]; then
             continue
           fi
           
-          echo "" # Salto de linea visual para que no se pegue el texto
-
-          if [[ "$update_response" =~ ^[Yy] ]]; then
+          if [[ "$update_response" =~ ^[Ss] ]]; then
+            echo "" # Confirmar salto
             echo "Descargando e instalando actualización..."
             curl -sL "$INSTALL_URL" | bash
             break
           elif [[ "$update_response" =~ ^[Nn] ]]; then
+            echo "" # Confirmar salto
             break
           elif [[ "$update_response" =~ ^[Ff] && "$total_lines" -gt 15 ]]; then
-            # Imprimir el resto del historial a partir de la linea 16
+            echo "" # Bajar del prompt
             echo "$changelog_updates" | tail -n +16
             echo -e ""
-            echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
-            total_lines=0 # Desactivamos la tecla 'f' para el resto del bucle
+            total_lines=0 # Desactivar tecla f
+            echo -ne "¿Deseas actualizar deps-alert de forma automática? (S/n): "
           else
-            # Input invalido
+            # Input invalido: Volvemos al inicio (\r), borramos la linea actual (\033[K) y repreguntamos en el mismo lugar
             if [ "$total_lines" -gt 15 ]; then
-              echo -n "(y/n/f): "
+              echo -ne "\r¿Actualizar? (s=sí, n=no, f=expandir $((total_lines - 15)) lineas): \033[K"
             else
-              echo -n "(y/n): "
+              echo -ne "\r¿Deseas actualizar deps-alert de forma automática? (S/n): \033[K"
             fi
           fi
         else
