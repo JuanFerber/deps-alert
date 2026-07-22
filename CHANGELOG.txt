@@ -1,3 +1,6 @@
+v1.0.9
+- Se reemplazo la advertencia amarilla en `install.sh` por un mensaje amigable indicando que se ha detectado una instalación existente.
+- Se integro el auto-formateo y correcta indentación de post-merge.sh al envolver todo en el bloque de ejecución seguro.
 v1.0.8
 - Se corrigió un bug crítico (Condición de Carrera de descriptores de archivo) envolviendo el bloque principal en '{ ... }' para blindar la auto-actualización. 
 - Se implemento una mejora inmaculada en la experiencia de usuario (UX) haciendo uso de la secuencia ANSI '\033[2A' para lograr expansiones fluidas y borrar repeticiones de terminal.

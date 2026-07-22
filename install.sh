@@ -35,7 +35,7 @@ fi
 if [ -f "$HOOK_FILE" ]; then
   # Prevenir bucle infinito: Si deps-alert ya esta instalado, solo lo actualizamos
   if grep -q "deps-alert" "$HOOK_FILE" 2>/dev/null; then
-    echo -e "${YELLOW}⚠️  deps-alert ya se encuentra instalado en este repositorio.${NC}"
+    echo -e "${CYAN}🔄 Instalación existente detectada. Entrando en modo actualización...${NC}"
     if [ -f "${HOOK_FILE}.deps-alert" ]; then
       echo "Actualizando el script secundario..."
       if command -v curl &>/dev/null; then
@@ -60,7 +60,7 @@ if [ -f "$HOOK_FILE" ]; then
   echo -e "\n${YELLOW}⚠️  Detectamos que ya tienes un archivo 'post-merge' configurado en tu proyecto.${NC}"
   echo "Para no romper tu configuracion, podemos crear un 'dispatcher' que ejecute tu codigo actual y luego el nuestro."
 
-    # Pregunta interactiva segura. Prevenimos fallos en entornos CI/CD
+  # Pregunta interactiva segura. Prevenimos fallos en entornos CI/CD
   user_response="s" # Respuesta por defecto
   if [ -c /dev/tty ] && [ -t 1 ]; then
     # Imprimimos la pregunta explícitamente para evitar que se pierda
