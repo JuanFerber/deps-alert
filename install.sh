@@ -10,7 +10,7 @@ NC='\033[0m'
 
 echo "Iniciando instalacion de deps-alert..."
 
-# Validar que Git este instalado
+# 1. Validaciones de entorno
 if ! command -v git &>/dev/null; then
   echo -e "${RED}Error: Git no esta instalado en el sistema.${NC}"
   exit 1
@@ -31,7 +31,7 @@ if [ ! -d "$HOOKS_DIR" ]; then
   mkdir "$HOOKS_DIR"
 fi
 
-# Validar existencia previa de un hook e interactuar con el usuario
+# 2. Analisis de hook existente
 if [ -f "$HOOK_FILE" ]; then
   # Prevenir bucle infinito: Si deps-alert ya esta instalado, solo lo actualizamos
   if grep -q "deps-alert" "$HOOK_FILE" 2>/dev/null; then
@@ -122,7 +122,7 @@ EOF
   fi
 
 else
-  # Instalacion normal si no habia hook previo
+  # 3. Instalacion limpia
   echo "Descargando la herramienta..."
   if command -v curl &>/dev/null; then
     curl -s -f -L "$HOOK_URL" -o "$HOOK_FILE"

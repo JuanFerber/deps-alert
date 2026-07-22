@@ -1,0 +1,12 @@
+v1.0.2
+- ci: configurar integracion continua con shellcheck
+- Agregado workflow de GitHub Actions para analisis estatico.
+- Añadida medalla de estado (badge) al inicio del README.
+v1.0.1
+- fix: hacer visible la pregunta interactiva en la consola
+- La redireccion de errores ocultaba el texto de la pregunta.
+- Se separo la pregunta usando echo.
+v1.0.0
+- feat: agregar script deps-alert e instalador interactivo
+- Script principal de post-merge para alertas de dependencias.
+- Instalador a prueba de fallos y entornos no interactivos.

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
+CURRENT_VERSION="v1.0.2"
 
-# Obtener los archivos modificados en el ultimo pull
+# 1. Analisis de repositorio
 changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD)
 
-# Archivos de dependencias comunes a verificar
+# 2. Chequeo de dependencias
 dependency_files=(
   "package.json" "package-lock.json" "yarn.lock" "pnpm-lock.yaml"
   "requirements.txt" "Pipfile" "Pipfile.lock" "poetry.lock" "pyproject.toml"
@@ -16,7 +17,7 @@ dependency_files=(
 found_changes=false
 changed_deps=""
 
-# Verificar si alguno de los archivos modificados coincide con nuestra lista
+# Comprobar si los archivos modificados estan en nuestra lista
 for current_file in $changed_files; do
   for dep_file in "${dependency_files[@]}"; do
     if [[ "$(basename "$current_file")" == "$dep_file" ]]; then
@@ -27,7 +28,7 @@ for current_file in $changed_files; do
   done
 done
 
-# Mostrar advertencia si hubo cambios
+# 3. Alerta visual
 if [ "$found_changes" = true ]; then
   YELLOW='\033[1;33m'
   RED='\033[0;31m'
@@ -37,4 +38,46 @@ if [ "$found_changes" = true ]; then
   echo -e "$changed_deps"
   echo -e "\n  ${YELLOW}Verifica si necesitas instalar o actualizar paquetes.${NC}"
   echo -e "${YELLOW}======================================================================${NC}\n"
+fi
+
+# 4. Auto-Actualizacion
+CHANGELOG_URL="https://raw.githubusercontent.com/JuanFerber/deps-alert/main/CHANGELOG.txt"
+INSTALL_URL="https://raw.githubusercontent.com/JuanFerber/deps-alert/main/install.sh"
+
+if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
+  latest_version=$(echo "$remote_changelog" | head -n 1)
+
+  # Validar que la version exista y sea mayor a la actual
+  if [[ "$latest_version" != "$CURRENT_VERSION" && "$latest_version" =~ ^v[0-9] ]]; then
+    CYAN='\033[0;36m'
+    NC='\033[0m'
+    echo -e "\n${CYAN}💡 Hay una nueva versión de deps-alert disponible ($latest_version).${NC}"
+    echo -e "${CYAN}Novedades:${NC}"
+
+    # Extraer novedades (maximo 15 lineas para no saturar la pantalla)
+    echo "$remote_changelog" | awk -v curr="$CURRENT_VERSION" '
+      BEGIN { count = 0 }
+      NR>1 {
+        if ($0 == curr) exit
+        if (count >= 15) {
+          print "  ... (hay mas cambios, revisa GitHub para ver la lista completa)"
+          exit
+        }
+        print "  " $0
+        count++
+      }
+    '
+
+    # Iniciar flujo interactivo seguro para actualizar
+    if [ -c /dev/tty ] && [ -t 1 ]; then
+      echo -e ""
+      echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
+      if read -r update_response </dev/tty; then
+        if [[ "$update_response" =~ ^[Yy] ]]; then
+          echo "Descargando e instalando actualización..."
+          curl -sL "$INSTALL_URL" | bash
+        fi
+      fi
+    fi
+  fi
 fi
