@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
-CURRENT_VERSION="v1.0.7"
+
+{
+CURRENT_VERSION="v1.0.8"
 
 # 1. Analisis de repositorio
 changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD 2>/dev/null || true)
@@ -77,8 +79,8 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
     # Mostrar novedades (limitado a 15)
     if [ "$total_lines" -gt 15 ]; then
       echo "$changelog_updates" | head -n 15
-      echo -e "  ...\n"
-      echo -ne "¿Actualizar? (s=sí, n=no, f=expandir $((total_lines - 15)) lineas): "
+      echo -e "  ... ($((total_lines - 15)) lineas ocultas)\n"
+      echo -ne "¿Deseas actualizar deps-alert de forma automática? (S/n/f (expandir)): "
     else
       echo "$changelog_updates"
       echo -e ""
@@ -102,7 +104,8 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
             echo "" # Confirmar salto
             break
           elif [[ "$update_response" =~ ^[Ff] && "$total_lines" -gt 15 ]]; then
-            echo "" # Bajar del prompt
+            # Volver 2 lineas hacia arriba y borrar hasta el final de la pantalla (borra el prompt y el "...")
+            echo -ne "\r\033[2A\033[J"
             echo "$changelog_updates" | tail -n +16
             echo -e ""
             total_lines=0 # Desactivar tecla f
@@ -110,7 +113,7 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
           else
             # Input invalido: Volvemos al inicio (\r), borramos la linea actual (\033[K) y repreguntamos en el mismo lugar
             if [ "$total_lines" -gt 15 ]; then
-              echo -ne "\r¿Actualizar? (s=sí, n=no, f=expandir $((total_lines - 15)) lineas): \033[K"
+              echo -ne "\r¿Deseas actualizar deps-alert de forma automática? (S/n/f (expandir)): \033[K"
             else
               echo -ne "\r¿Deseas actualizar deps-alert de forma automática? (S/n): \033[K"
             fi
@@ -122,3 +125,4 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
     fi
   fi
 fi
+}

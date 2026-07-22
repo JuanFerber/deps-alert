@@ -1,3 +1,6 @@
+v1.0.8
+- Se corrigió un bug crítico (Condición de Carrera de descriptores de archivo) envolviendo el bloque principal en '{ ... }' para blindar la auto-actualización. 
+- Se implemento una mejora inmaculada en la experiencia de usuario (UX) haciendo uso de la secuencia ANSI '\033[2A' para lograr expansiones fluidas y borrar repeticiones de terminal.
 v1.0.7
 - Se reforzó la identidad del proyecto limitando las interacciones estrictamente a la letra 'S' para confirmar.
 - Se actualizaron todos los prompts visuales de (y/n) a (S/n) en el instalador y en el auto-actualizador para mantener coherencia nativa en español.
