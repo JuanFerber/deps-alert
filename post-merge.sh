@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
-CURRENT_VERSION="v1.0.4"
+CURRENT_VERSION="v1.0.5"
 
 # 1. Analisis de repositorio
 changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD)
@@ -70,7 +70,7 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
       NR>1 {
         if ($0 == curr) exit
         if (count >= 15) {
-          print "  ... (hay mas cambios, revisa GitHub para ver la lista completa)"
+          print "  ... (hay mas cambios, presiona f luego para ver la lista completa)"
           exit
         }
         print "  " $0
@@ -80,14 +80,30 @@ if remote_changelog=$(curl -s -m 3 "$CHANGELOG_URL" 2>/dev/null); then
 
     # Iniciar flujo interactivo seguro para actualizar
     if [ -c /dev/tty ] && [ -t 1 ]; then
-      echo -e ""
-      echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n): "
-      if read -r update_response </dev/tty; then
-        if [[ "$update_response" =~ ^[Yy] ]]; then
-          echo "Descargando e instalando actualización..."
-          curl -sL "$INSTALL_URL" | bash
+      while true; do
+        echo -e ""
+        echo -n "¿Deseas actualizar deps-alert de forma automática? (y/n/f para ver todo): "
+        if read -r update_response </dev/tty; then
+          if [[ "$update_response" =~ ^[Yy] ]]; then
+            echo "Descargando e instalando actualización..."
+            curl -sL "$INSTALL_URL" | bash
+            break
+          elif [[ "$update_response" =~ ^[Ff] ]]; then
+            echo -e "\n${CYAN}--- Historial Completo ---${NC}"
+            echo "$remote_changelog" | awk -v curr="$CURRENT_VERSION" '
+              NR>1 {
+                if ($0 == curr) exit
+                print "  " $0
+              }
+            '
+            echo -e "${CYAN}--------------------------${NC}"
+          else
+            break
+          fi
+        else
+          break
         fi
-      fi
+      done
     fi
   fi
 fi

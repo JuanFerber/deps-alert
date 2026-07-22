@@ -1,3 +1,6 @@
+v1.0.5
+- Se agrego soporte interactivo en la terminal (tecla 'f') para permitir ver el changelog completo sin limite de lineas.
+- Se implemento un bucle de validacion en el auto-actualizador para mejorar la Experiencia de Usuario (UX) ante respuestas incorrectas.
 v1.0.4
 - Se implemento lectura dinamica del archivo de configuracion .depsalertrc.
 - Se actualizo la documentacion (README.md) con templates de uso.
