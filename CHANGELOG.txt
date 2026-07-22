@@ -1,3 +1,13 @@
+v1.0.4
+- Se implemento lectura dinamica del archivo de configuracion .depsalertrc.
+- Se actualizo la documentacion (README.md) con templates de uso.
+- Se incorporo captura de titulo y git add global en release.sh para orquestar lanzamientos interactivos.
+v1.0.3
+- feat(core): agregar auto-actualizador interactivo
+- Se implemento modulo de auto-actualizacion en post-merge.sh con limite de proteccion en pantalla.
+- Se creo la base de datos CHANGELOG.txt para controlar versiones.
+- Se desarrollo la herramienta interna release.sh para automatizar lanzamientos.
+- Se refactorizaron y limpiaron los comentarios de todo el codigo base.
 v1.0.2
 - ci: configurar integracion continua con shellcheck
 - Agregado workflow de GitHub Actions para analisis estatico.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # deps-alert-hook
 # Script ejecutado por Git despues de un merge o pull exitoso
-CURRENT_VERSION="v1.0.2"
+CURRENT_VERSION="v1.0.4"
 
 # 1. Analisis de repositorio
 changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD)
@@ -13,6 +13,16 @@ dependency_files=(
   "Gemfile.lock" "composer.lock" "go.mod" "go.sum" "Cargo.lock"
   "build.gradle" "pom.xml"
 )
+
+# Leer configuracion personalizada si existe (.depsalertrc)
+if [ -f ".depsalertrc" ]; then
+  while IFS= read -r line; do
+    # Ignorar lineas vacias y comentarios (que empiecen con #)
+    if [[ -n "$line" && ! "$line" =~ ^# ]]; then
+      dependency_files+=("$line")
+    fi
+  done <".depsalertrc"
+fi
 
 found_changes=false
 changed_deps=""

@@ -35,6 +35,24 @@ Actualmente, el script vigila cambios en los siguientes archivos:
 - Java: `pom.xml`, `build.gradle`
 - PHP/Ruby: `composer.lock`, `Gemfile.lock`
 
+## ⚙️ Configuración Personalizada (.depsalertrc)
+
+Si usas un framework menos común o tienes archivos de dependencias internos en tu empresa, puedes crear un archivo llamado `.depsalertrc` en la raíz de tu proyecto para enseñarle a la herramienta a vigilarlos.
+
+Solo debes escribir el nombre o la ruta del archivo por línea. Puedes usar `#` para dejarte comentarios.
+
+**Template de ejemplo:**
+
+```text
+# .depsalertrc
+# Archivos internos del backend
+backend/config/dependencias.yml
+# Archivos de frontend raro
+mi-framework.lock
+```
+
+El script leerá este archivo automáticamente de forma silenciosa y sumará tus reglas a la lista por defecto.
+
 ## 🤝 Contribuciones
 
 ¡Las contribuciones son bienvenidas! Siéntete libre de abrir un issue o enviar un Pull Request si quieres agregar soporte para nuevos lenguajes o mejorar el script.

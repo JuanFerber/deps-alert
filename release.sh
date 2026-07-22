@@ -19,21 +19,31 @@ rm -f "${SCRIPT_FILE}.tmp"
 chmod +x "$SCRIPT_FILE"
 echo "✅ Variable CURRENT_VERSION actualizada en $SCRIPT_FILE"
 
-# 2. Pedir novedades abriendo el editor de texto preferido del usuario (por defecto nano)
-echo "$NEW_VERSION" > temp_changelog.txt
-echo "- (Escribe tus cambios aqui. Borra este parentesis. Guarda y cierra el editor cuando termines)" >> temp_changelog.txt
+# 2. Pedir titulo del commit
+echo -n "Escribe el titulo corto del commit (ej. feat: soporte configs): "
+read -r COMMIT_TITLE
+if [ -z "$COMMIT_TITLE" ]; then
+  COMMIT_TITLE="chore: release $NEW_VERSION"
+fi
+
+# 3. Pedir novedades abriendo el editor de texto preferido del usuario (por defecto nano)
+echo "$NEW_VERSION" >temp_changelog.txt
+echo "- (Escribe tus cambios aqui. Borra este parentesis. Guarda y cierra el editor cuando termines)" >>temp_changelog.txt
 
 # Abrir editor
 ${EDITOR:-nano} temp_changelog.txt
+
+# Extraer el cuerpo del mensaje (saltando la linea 1 que tiene la version)
+COMMIT_BODY=$(tail -n +2 temp_changelog.txt)
 
 # Unir el texto nuevo con el changelog viejo
 cat "$CHANGELOG_FILE" >>temp_changelog.txt
 mv temp_changelog.txt "$CHANGELOG_FILE"
 echo "✅ $CHANGELOG_FILE actualizado"
 
-# Operaciones de Git (Add, Commit, Tag, Push)
-git add "$SCRIPT_FILE" "$CHANGELOG_FILE"
-git commit -m "chore: release $NEW_VERSION"
+# 4. Operaciones de Git (Add, Commit, Tag, Push)
+git add .
+git commit -m "$COMMIT_TITLE" -m "$COMMIT_BODY"
 git tag "$NEW_VERSION"
 git push origin main
 git push origin "$NEW_VERSION"
